@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0d1a" />
+  <meta name="description" content="Haptic Control — remotely trigger vibration and sound on your partner's phone." />
+  <title>Haptic Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════ LANDING ═══════════════ -->
+  <section id="screen-landing" class="screen active">
+    <div class="bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="landing-content">
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <path d="M20 4C11.163 4 4 11.163 4 20s7.163 16 16 16 16-7.163 16-16S28.837 4 20 4z" fill="url(#logoGrad)" opacity="0.3"/>
+            <path d="M14 13l4 7-4 7h3l2.5-4.5L22 27h3l-4-7 4-7h-3l-2.5 4.5L17 13h-3z" fill="#fff"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="4" y1="4" x2="36" y2="36">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#ec4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">HapticLink</span>
+      </div>
+      <h1 class="hero-title">Feel the<br/><span class="gradient-text">Connection</span></h1>
+      <p class="hero-sub">Control vibration &amp; sound on your partner's phone — instantly, anywhere in the world.</p>
+      <div class="landing-buttons">
+        <button id="btn-create" class="btn btn-primary" onclick="App.goCreate()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Create Room
+        </button>
+        <button id="btn-join" class="btn btn-secondary" onclick="App.goJoin()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Join Room
+        </button>
+      </div>
+      <p class="landing-note">Works on any browser · No app required</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CREATE ROOM ═══════════════ -->
+  <section id="screen-create" class="screen">
+    <div class="bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+    <div class="card-wrap">
+      <button class="back-btn" onclick="App.goLanding()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="card">
+        <div class="card-icon pulse-ring">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h2>Waiting for Partner</h2>
+        <p class="card-sub">Share this code with your partner</p>
+        <div class="room-code-display" id="room-code-display">
+          <span class="code-char" id="c0">—</span>
+          <span class="code-char" id="c1">—</span>
+          <span class="code-char" id="c2">—</span>
+          <span class="code-separator">·</span>
+          <span class="code-char" id="c3">—</span>
+          <span class="code-char" id="c4">—</span>
+          <span class="code-char" id="c5">—</span>
+        </div>
+        <button class="btn btn-ghost" id="btn-copy-code" onclick="App.copyCode()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Code
+        </button>
+        <div class="status-badge waiting" id="create-status">
+          <span class="dot"></span> Waiting for partner…
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ JOIN ROOM ═══════════════ -->
+  <section id="screen-join" class="screen">
+    <div class="bg-orbs">
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="card-wrap">
+      <button class="back-btn" onclick="App.goLanding()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="card">
+        <div class="card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h2>Enter Room Code</h2>
+        <p class="card-sub">Ask your partner for their 6-character code</p>
+        <div class="code-input-row" id="code-input-row">
+          <input id="ci-0" class="code-input" maxlength="1" inputmode="text" autocomplete="off" />
+          <input id="ci-1" class="code-input" maxlength="1" inputmode="text" autocomplete="off" />
+          <input id="ci-2" class="code-input" maxlength="1" inputmode="text" autocomplete="off" />
+          <div class="code-sep-dot">·</div>
+          <input id="ci-3" class="code-input" maxlength="1" inputmode="text" autocomplete="off" />
+          <input id="ci-4" class="code-input" maxlength="1" inputmode="text" autocomplete="off" />
+          <input id="ci-5" class="code-input" maxlength="1" inputmode="text" autocomplete="off" />
+        </div>
+        <div class="error-msg hidden" id="join-error"></div>
+        <button class="btn btn-primary" id="btn-join-submit" onclick="App.submitJoin()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Connect
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CONTROLLER ═══════════════ -->
+  <section id="screen-controller" class="screen">
+    <div class="bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="ctrl-wrap">
+      <header class="ctrl-header">
+        <div class="ctrl-logo">
+          <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><path d="M14 13l4 7-4 7h3l2.5-4.5L22 27h3l-4-7 4-7h-3l-2.5 4.5L17 13h-3z" fill="#a78bfa"/></svg>
+          HapticLink
+        </div>
+        <div class="ctrl-badge connected">
+          <span class="dot"></span> Connected
+        </div>
+        <button class="icon-btn" onclick="App.disconnect()" title="Disconnect">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </header>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab active" id="tab-vibrate" onclick="App.switchTab('vibrate')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M5 12l4-4m-4 4 4 4M19 12l-4-4m4 4-4 4" opacity="0.5"/><path d="M3 6l2 2M3 18l2-2M21 6l-2 2M21 18l-2-2"/></svg>
+          Vibrate
+        </button>
+        <button class="tab" id="tab-sound" onclick="App.switchTab('sound')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          Sound
+        </button>
+      </div>
+
+      <!-- ── VIBRATE PANEL ── -->
+      <div class="tab-panel active" id="panel-vibrate">
+        <div class="section-label">Intensity</div>
+        <div class="slider-track-wrap">
+          <input type="range" id="vib-intensity" class="slider" min="1" max="5" value="3" step="1" oninput="App.updateIntensityLabel(this.value)" />
+          <div class="slider-labels">
+            <span>Soft</span><span>Medium</span><span>Strong</span><span>Intense</span><span>Max</span>
+          </div>
+        </div>
+
+        <div class="section-label">Patterns</div>
+        <div class="pattern-grid">
+          <button class="pat-btn" id="pat-pulse" onclick="App.sendVibrate('pulse')">
+            <div class="pat-icon">〜</div>
+            <div class="pat-name">Pulse</div>
+            <div class="pat-sub">Quick bursts</div>
+          </button>
+          <button class="pat-btn" id="pat-heartbeat" onclick="App.sendVibrate('heartbeat')">
+            <div class="pat-icon">♥</div>
+            <div class="pat-name">Heartbeat</div>
+            <div class="pat-sub">Lub-dub rhythm</div>
+          </button>
+          <button class="pat-btn" id="pat-wave" onclick="App.sendVibrate('wave')">
+            <div class="pat-icon">≋</div>
+            <div class="pat-name">Wave</div>
+            <div class="pat-sub">Slow rising</div>
+          </button>
+          <button class="pat-btn" id="pat-sos" onclick="App.sendVibrate('sos')">
+            <div class="pat-icon">···</div>
+            <div class="pat-name">SOS</div>
+            <div class="pat-sub">Morse signal</div>
+          </button>
+          <button class="pat-btn" id="pat-rapid" onclick="App.sendVibrate('rapid')">
+            <div class="pat-icon">⚡</div>
+            <div class="pat-name">Rapid</div>
+            <div class="pat-sub">Fast taps</div>
+          </button>
+          <button class="pat-btn" id="pat-long" onclick="App.sendVibrate('long')">
+            <div class="pat-icon">━</div>
+            <div class="pat-name">Long</div>
+            <div class="pat-sub">Continuous</div>
+          </button>
+        </div>
+
+        <button class="btn btn-danger" id="btn-stop-vib" onclick="App.stopAll()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Stop All
+        </button>
+      </div>
+
+      <!-- ── SOUND PANEL ── -->
+      <div class="tab-panel" id="panel-sound">
+        <div class="section-label">Volume</div>
+        <div class="slider-track-wrap">
+          <input type="range" id="snd-volume" class="slider" min="0" max="100" value="70" step="5" />
+          <div class="slider-labels">
+            <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+          </div>
+        </div>
+
+        <div class="section-label">Sounds</div>
+        <div class="sound-grid">
+          <button class="snd-btn" onclick="App.sendSound('chime')">
+            <div class="snd-emoji">🔔</div>
+            <div class="snd-name">Chime</div>
+          </button>
+          <button class="snd-btn" onclick="App.sendSound('alert')">
+            <div class="snd-emoji">🚨</div>
+            <div class="snd-name">Alert</div>
+          </button>
+          <button class="snd-btn" onclick="App.sendSound('beep')">
+            <div class="snd-emoji">📡</div>
+            <div class="snd-name">Beep</div>
+          </button>
+          <button class="snd-btn" onclick="App.sendSound('love')">
+            <div class="snd-emoji">💖</div>
+            <div class="snd-name">Love</div>
+          </button>
+          <button class="snd-btn" onclick="App.sendSound('ping')">
+            <div class="snd-emoji">✨</div>
+            <div class="snd-name">Ping</div>
+          </button>
+          <button class="snd-btn" onclick="App.sendSound('thunder')">
+            <div class="snd-emoji">⚡</div>
+            <div class="snd-name">Thunder</div>
+          </button>
+          <button class="snd-btn" onclick="App.sendSound('whistle')">
+            <div class="snd-emoji">🎵</div>
+            <div class="snd-name">Melody</div>
+          </button>
+          <button class="snd-btn" onclick="App.sendSound('siren')">
+            <div class="snd-emoji">🔊</div>
+            <div class="snd-name">Siren</div>
+          </button>
+        </div>
+
+        <div class="section-label" style="margin-top:1.5rem">Combo — Vibrate + Sound</div>
+        <div class="combo-row">
+          <button class="combo-btn" onclick="App.sendCombo('love')">
+            💖 Love Signal
+          </button>
+          <button class="combo-btn" onclick="App.sendCombo('attention')">
+            🚨 Hey! Attention
+          </button>
+          <button class="combo-btn" onclick="App.sendCombo('celebrate')">
+            🎉 Celebrate
+          </button>
+        </div>
+
+        <button class="btn btn-danger" style="margin-top:1rem" onclick="App.stopAll()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Stop All
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ RECEIVER ═══════════════ -->
+  <section id="screen-receiver" class="screen">
+    <div class="bg-orbs">
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="receiver-wrap">
+      <header class="ctrl-header">
+        <div class="ctrl-logo">
+          <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><path d="M14 13l4 7-4 7h3l2.5-4.5L22 27h3l-4-7 4-7h-3l-2.5 4.5L17 13h-3z" fill="#ec4899"/></svg>
+          HapticLink
+        </div>
+        <div class="ctrl-badge connected">
+          <span class="dot"></span> Receiving
+        </div>
+        <button class="icon-btn" onclick="App.disconnect()" title="Disconnect">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </header>
+
+      <div class="receiver-body">
+        <div class="receiver-ring" id="receiver-ring">
+          <div class="ring r1"></div>
+          <div class="ring r2"></div>
+          <div class="ring r3"></div>
+          <div class="receiver-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="17" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <p class="receiver-status" id="receiver-status">Waiting for signal…</p>
+        <div class="receiver-log" id="receiver-log">
+          <div class="log-item hint">Signals from your partner will appear here</div>
+        </div>
+
+        <!-- Manual unlock for audio (browsers require gesture) -->
+        <button class="btn btn-ghost" id="btn-unlock-audio" onclick="App.unlockAudio()" style="margin-top:1rem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          Enable Sound (tap once)
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TOAST ═══════════════ -->
+  <div id="toast" class="toast"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
