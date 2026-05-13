@@ -57,30 +57,22 @@ io.on('connection', (socket) => {
     cb({ success: true, code: upperCode });
   });
 
-  // Relay: controller -> receiver (vibrate command)
+  // Relay: Broadcast to other person in room
   socket.on('vibrate', (payload) => {
-    if (socket.role !== 'controller') return;
-    const room = rooms.get(socket.roomCode);
-    if (room?.receiver) {
-      io.to(room.receiver).emit('vibrate', payload);
+    if (socket.roomCode) {
+      socket.to(socket.roomCode).emit('vibrate', payload);
     }
   });
 
-  // Relay: controller -> receiver (sound command)
   socket.on('play_sound', (payload) => {
-    if (socket.role !== 'controller') return;
-    const room = rooms.get(socket.roomCode);
-    if (room?.receiver) {
-      io.to(room.receiver).emit('play_sound', payload);
+    if (socket.roomCode) {
+      socket.to(socket.roomCode).emit('play_sound', payload);
     }
   });
 
-  // Relay: controller -> receiver (stop everything)
   socket.on('stop_all', () => {
-    if (socket.role !== 'controller') return;
-    const room = rooms.get(socket.roomCode);
-    if (room?.receiver) {
-      io.to(room.receiver).emit('stop_all');
+    if (socket.roomCode) {
+      socket.to(socket.roomCode).emit('stop_all');
     }
   });
 
