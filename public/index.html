@@ -121,194 +121,107 @@
     </div>
   </section>
 
-  <!-- ═══════════════ CONTROLLER ═══════════════ -->
-  <section id="screen-controller" class="screen">
+  <!-- ═══════════════ UNIFIED ROOM ═══════════════ -->
+  <section id="screen-room" class="screen">
     <div class="bg-orbs">
       <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
       <div class="orb orb-3"></div>
     </div>
-    <div class="ctrl-wrap">
+    
+    <div class="room-container">
       <header class="ctrl-header">
         <div class="ctrl-logo">
           <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><path d="M14 13l4 7-4 7h3l2.5-4.5L22 27h3l-4-7 4-7h-3l-2.5 4.5L17 13h-3z" fill="#a78bfa"/></svg>
           HapticLink
         </div>
-        <div class="ctrl-badge connected">
-          <span class="dot"></span> Connected
+        <div class="room-info">
+          <span class="room-id-tag" onclick="App.copyCode()">Code: <b id="display-room-code">......</b></span>
+          <div class="ctrl-badge connected">
+            <span class="dot"></span> Online
+          </div>
         </div>
         <button class="icon-btn" onclick="App.disconnect()" title="Disconnect">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </header>
 
-      <!-- Tab bar -->
-      <div class="tab-bar">
-        <button class="tab active" id="tab-vibrate" onclick="App.switchTab('vibrate')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M5 12l4-4m-4 4 4 4M19 12l-4-4m4 4-4 4" opacity="0.5"/><path d="M3 6l2 2M3 18l2-2M21 6l-2 2M21 18l-2-2"/></svg>
-          Vibrate
-        </button>
-        <button class="tab" id="tab-sound" onclick="App.switchTab('sound')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          Sound
-        </button>
-      </div>
+      <div class="room-layout">
+        <!-- Left/Top: Receiver Status -->
+        <div class="receiver-section">
+          <div class="receiver-ring" id="receiver-ring">
+            <div class="ring r1"></div>
+            <div class="ring r2"></div>
+            <div class="ring r3"></div>
+            <div class="receiver-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="17" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <p class="receiver-status" id="receiver-status">Waiting for signal…</p>
+          
+          <button class="btn btn-unlock" id="btn-unlock-all" onclick="App.unlockEverything()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a5 5 0 0 0-5 5v4H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zM9 6a3 3 0 0 1 6 0v4H9V6z"/></svg>
+            Tap to Sync & Unlock
+          </button>
+        </div>
 
-      <!-- ── VIBRATE PANEL ── -->
-      <div class="tab-panel active" id="panel-vibrate">
-        <div class="section-label">Intensity</div>
-        <div class="slider-track-wrap">
-          <input type="range" id="vib-intensity" class="slider" min="1" max="5" value="3" step="1" oninput="App.updateIntensityLabel(this.value)" />
-          <div class="slider-labels">
-            <span>Soft</span><span>Medium</span><span>Strong</span><span>Intense</span><span>Max</span>
+        <!-- Right/Bottom: Controls -->
+        <div class="controls-section">
+          <div class="tab-bar">
+            <button class="tab active" id="tab-vibrate" onclick="App.switchTab('vibrate')">Vibrate</button>
+            <button class="tab" id="tab-sound" onclick="App.switchTab('sound')">Sound</button>
+            <button class="tab" id="tab-logs" onclick="App.switchTab('logs')">History</button>
+          </div>
+
+          <!-- VIBRATE PANEL -->
+          <div class="tab-panel active" id="panel-vibrate">
+            <div class="section-label">Intensity</div>
+            <div class="slider-track-wrap">
+              <input type="range" id="vib-intensity" class="slider" min="1" max="5" value="3" step="1" oninput="App.updateIntensityLabel(this.value)" />
+              <div class="slider-labels"><span>Soft</span><span>Strong</span></div>
+            </div>
+
+            <div class="pattern-grid">
+              <button class="pat-btn" id="pat-pulse" onclick="App.sendVibrate('pulse')">Pulse</button>
+              <button class="pat-btn" id="pat-heartbeat" onclick="App.sendVibrate('heartbeat')">Heartbeat</button>
+              <button class="pat-btn" id="pat-wave" onclick="App.sendVibrate('wave')">Wave</button>
+              <button class="pat-btn" id="pat-sos" onclick="App.sendVibrate('sos')">SOS</button>
+              <button class="pat-btn" id="pat-rapid" onclick="App.sendVibrate('rapid')">Rapid</button>
+              <button class="pat-btn" id="pat-long" onclick="App.sendVibrate('long')">Long</button>
+            </div>
+          </div>
+
+          <!-- SOUND PANEL -->
+          <div class="tab-panel" id="panel-sound">
+            <div class="section-label">Volume</div>
+            <input type="range" id="snd-volume" class="slider" min="0" max="100" value="70" step="5" />
+            
+            <div class="sound-grid">
+              <button class="snd-btn" onclick="App.sendSound('chime')">🔔 Chime</button>
+              <button class="snd-btn" onclick="App.sendSound('alert')">🚨 Alert</button>
+              <button class="snd-btn" onclick="App.sendSound('beep')">📡 Beep</button>
+              <button class="snd-btn" onclick="App.sendSound('love')">💖 Love</button>
+              <button class="snd-btn" onclick="App.sendSound('ping')">✨ Ping</button>
+              <button class="snd-btn" onclick="App.sendSound('thunder')">⚡ Thunder</button>
+            </div>
+            
+            <div class="combo-row" style="margin-top: 1rem;">
+              <button class="combo-btn" onclick="App.sendCombo('love')">💖 Love Signal</button>
+              <button class="combo-btn" onclick="App.sendCombo('attention')">🚨 Hey!</button>
+            </div>
+          </div>
+
+          <!-- LOGS PANEL -->
+          <div class="tab-panel" id="panel-logs">
+            <div class="receiver-log" id="receiver-log">
+              <div class="log-item hint">Activity history will appear here</div>
+            </div>
+          </div>
+
+          <div class="actions-footer">
+            <button class="btn btn-danger" onclick="App.stopAll()">Stop Everything</button>
           </div>
         </div>
-
-        <div class="section-label">Patterns</div>
-        <div class="pattern-grid">
-          <button class="pat-btn" id="pat-pulse" onclick="App.sendVibrate('pulse')">
-            <div class="pat-icon">〜</div>
-            <div class="pat-name">Pulse</div>
-            <div class="pat-sub">Quick bursts</div>
-          </button>
-          <button class="pat-btn" id="pat-heartbeat" onclick="App.sendVibrate('heartbeat')">
-            <div class="pat-icon">♥</div>
-            <div class="pat-name">Heartbeat</div>
-            <div class="pat-sub">Lub-dub rhythm</div>
-          </button>
-          <button class="pat-btn" id="pat-wave" onclick="App.sendVibrate('wave')">
-            <div class="pat-icon">≋</div>
-            <div class="pat-name">Wave</div>
-            <div class="pat-sub">Slow rising</div>
-          </button>
-          <button class="pat-btn" id="pat-sos" onclick="App.sendVibrate('sos')">
-            <div class="pat-icon">···</div>
-            <div class="pat-name">SOS</div>
-            <div class="pat-sub">Morse signal</div>
-          </button>
-          <button class="pat-btn" id="pat-rapid" onclick="App.sendVibrate('rapid')">
-            <div class="pat-icon">⚡</div>
-            <div class="pat-name">Rapid</div>
-            <div class="pat-sub">Fast taps</div>
-          </button>
-          <button class="pat-btn" id="pat-long" onclick="App.sendVibrate('long')">
-            <div class="pat-icon">━</div>
-            <div class="pat-name">Long</div>
-            <div class="pat-sub">Continuous</div>
-          </button>
-        </div>
-
-        <button class="btn btn-danger" id="btn-stop-vib" onclick="App.stopAll()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          Stop All
-        </button>
-      </div>
-
-      <!-- ── SOUND PANEL ── -->
-      <div class="tab-panel" id="panel-sound">
-        <div class="section-label">Volume</div>
-        <div class="slider-track-wrap">
-          <input type="range" id="snd-volume" class="slider" min="0" max="100" value="70" step="5" />
-          <div class="slider-labels">
-            <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
-          </div>
-        </div>
-
-        <div class="section-label">Sounds</div>
-        <div class="sound-grid">
-          <button class="snd-btn" onclick="App.sendSound('chime')">
-            <div class="snd-emoji">🔔</div>
-            <div class="snd-name">Chime</div>
-          </button>
-          <button class="snd-btn" onclick="App.sendSound('alert')">
-            <div class="snd-emoji">🚨</div>
-            <div class="snd-name">Alert</div>
-          </button>
-          <button class="snd-btn" onclick="App.sendSound('beep')">
-            <div class="snd-emoji">📡</div>
-            <div class="snd-name">Beep</div>
-          </button>
-          <button class="snd-btn" onclick="App.sendSound('love')">
-            <div class="snd-emoji">💖</div>
-            <div class="snd-name">Love</div>
-          </button>
-          <button class="snd-btn" onclick="App.sendSound('ping')">
-            <div class="snd-emoji">✨</div>
-            <div class="snd-name">Ping</div>
-          </button>
-          <button class="snd-btn" onclick="App.sendSound('thunder')">
-            <div class="snd-emoji">⚡</div>
-            <div class="snd-name">Thunder</div>
-          </button>
-          <button class="snd-btn" onclick="App.sendSound('whistle')">
-            <div class="snd-emoji">🎵</div>
-            <div class="snd-name">Melody</div>
-          </button>
-          <button class="snd-btn" onclick="App.sendSound('siren')">
-            <div class="snd-emoji">🔊</div>
-            <div class="snd-name">Siren</div>
-          </button>
-        </div>
-
-        <div class="section-label" style="margin-top:1.5rem">Combo — Vibrate + Sound</div>
-        <div class="combo-row">
-          <button class="combo-btn" onclick="App.sendCombo('love')">
-            💖 Love Signal
-          </button>
-          <button class="combo-btn" onclick="App.sendCombo('attention')">
-            🚨 Hey! Attention
-          </button>
-          <button class="combo-btn" onclick="App.sendCombo('celebrate')">
-            🎉 Celebrate
-          </button>
-        </div>
-
-        <button class="btn btn-danger" style="margin-top:1rem" onclick="App.stopAll()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          Stop All
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ RECEIVER ═══════════════ -->
-  <section id="screen-receiver" class="screen">
-    <div class="bg-orbs">
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-    </div>
-    <div class="receiver-wrap">
-      <header class="ctrl-header">
-        <div class="ctrl-logo">
-          <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><path d="M14 13l4 7-4 7h3l2.5-4.5L22 27h3l-4-7 4-7h-3l-2.5 4.5L17 13h-3z" fill="#ec4899"/></svg>
-          HapticLink
-        </div>
-        <div class="ctrl-badge connected">
-          <span class="dot"></span> Receiving
-        </div>
-        <button class="icon-btn" onclick="App.disconnect()" title="Disconnect">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </button>
-      </header>
-
-      <div class="receiver-body">
-        <div class="receiver-ring" id="receiver-ring">
-          <div class="ring r1"></div>
-          <div class="ring r2"></div>
-          <div class="ring r3"></div>
-          <div class="receiver-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="17" x2="12" y2="17" stroke-width="2.5" stroke-linecap="round"/></svg>
-          </div>
-        </div>
-        <p class="receiver-status" id="receiver-status">Waiting for signal…</p>
-        <div class="receiver-log" id="receiver-log">
-          <div class="log-item hint">Signals from your partner will appear here</div>
-        </div>
-
-        <!-- Manual unlock for audio (browsers require gesture) -->
-        <button class="btn btn-ghost" id="btn-unlock-audio" onclick="App.unlockAudio()" style="margin-top:1rem">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          Enable Sound (tap once)
-        </button>
       </div>
     </div>
   </section>

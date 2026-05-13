@@ -129,7 +129,8 @@ const App = (() => {
   // ── Screen navigation ───────────────────────
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-' + id).classList.add('active');
+    const target = document.getElementById('screen-' + id);
+    if (target) target.classList.add('active');
   }
 
   function goLanding() {
@@ -152,6 +153,13 @@ const App = (() => {
     showScreen('join');
     initCodeInputs();
     if (!socket) initSocket();
+  }
+
+  function enterRoom(code) {
+    roomCode = code;
+    document.getElementById('display-room-code').textContent = roomCode;
+    showScreen('room');
+    showToast('🚀 Room Ready!');
   }
 
   function displayCode(code) {
@@ -207,9 +215,7 @@ const App = (() => {
     if (!socket) initSocket();
     socket.emit('join_room', code, (res) => {
       if (!res.success) return setJoinError(res.error || 'Failed to join');
-      roomCode = res.code;
-      role = 'receiver';
-      showScreen('receiver');
+      enterRoom(res.code);
     });
   }
 
@@ -232,8 +238,7 @@ const App = (() => {
     });
 
     socket.on('partner_joined', () => {
-      role = 'controller';
-      showScreen('controller');
+      enterRoom(roomCode);
       showToast('🎉 Partner connected!');
     });
 
@@ -243,16 +248,14 @@ const App = (() => {
     });
 
     socket.on('vibrate', (payload) => {
-      if (role !== 'receiver') return;
       doVibrate(payload);
-      addLog('vib', '📳 Vibration — ' + payload.pattern + ' (×' + payload.intensity + ')');
+      addLog('vib', '📳 Received: ' + payload.pattern);
       activateReceiverRing();
     });
 
     socket.on('play_sound', (payload) => {
-      if (role !== 'receiver') return;
       doPlaySound(payload);
-      addLog('snd', '🔊 Sound — ' + payload.sound);
+      addLog('snd', '🔊 Received: ' + payload.sound);
       activateReceiverRing();
     });
 
@@ -269,19 +272,23 @@ const App = (() => {
     });
   }
 
-  // ── Vibration (on receiver) ─────────────────
+  // ── Vibration ───────────────────────────────
   function doVibrate(payload) {
-    if (!('vibrate' in navigator)) return;
+    if (!('vibrate' in navigator)) {
+      showToast('⚠️ Vibration not supported on this device/browser');
+      return;
+    }
     const base = VIB_PATTERNS[payload.pattern] || VIB_PATTERNS.pulse;
     const scaled = scalePattern(base, payload.intensity);
     navigator.vibrate(scaled);
     document.getElementById('receiver-status').textContent = `Feeling: ${payload.pattern}…`;
+    const totalMs = scaled.reduce((a,b)=>a+b,0);
     setTimeout(() => {
       document.getElementById('receiver-status').textContent = 'Waiting for signal…';
-    }, scaled.reduce((a,b)=>a+b,0) + 500);
+    }, totalMs + 500);
   }
 
-  // ── Sound (on receiver) ─────────────────────
+  // ── Sound ───────────────────────────────────
   function doPlaySound(payload) {
     const fn = SOUNDS[payload.sound];
     if (fn) fn(payload.volume ?? 0.7);
@@ -293,12 +300,15 @@ const App = (() => {
 
   function activateReceiverRing() {
     const ring = document.getElementById('receiver-ring');
-    ring.classList.add('active');
-    setTimeout(() => ring.classList.remove('active'), 1200);
+    if (ring) {
+      ring.classList.add('active');
+      setTimeout(() => ring.classList.remove('active'), 1200);
+    }
   }
 
   function addLog(type, msg) {
     const log = document.getElementById('receiver-log');
+    if (!log) return;
     const hint = log.querySelector('.hint');
     if (hint) hint.remove();
     const now = new Date();
@@ -308,11 +318,10 @@ const App = (() => {
     div.innerHTML = `<span>${msg}</span><span class="log-time">${time}</span>`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
-    // Keep only last 20 logs
-    while (log.children.length > 20) log.removeChild(log.firstChild);
+    while (log.children.length > 30) log.removeChild(log.firstChild);
   }
 
-  // ── Controller actions ──────────────────────
+  // ── Actions ─────────────────────────────────
   function updateIntensityLabel(val) {
     vibIntensity = parseInt(val);
   }
@@ -322,7 +331,7 @@ const App = (() => {
     const payload = { pattern, intensity: vibIntensity };
     socket.emit('vibrate', payload);
     flashBtn('pat-' + pattern);
-    showToast('📳 Sent ' + pattern + ' vibration');
+    showToast('📳 Sent: ' + pattern);
   }
 
   function sendSound(soundName) {
@@ -330,7 +339,7 @@ const App = (() => {
     const vol = (document.getElementById('snd-volume')?.value ?? 70) / 100;
     const payload = { sound: soundName, volume: vol };
     socket.emit('play_sound', payload);
-    showToast('🔊 Sent ' + soundName + ' sound');
+    showToast('🔊 Sent: ' + soundName);
   }
 
   function sendCombo(comboName) {
@@ -340,13 +349,14 @@ const App = (() => {
     const vol = (document.getElementById('snd-volume')?.value ?? 70) / 100;
     socket.emit('vibrate', { pattern: combo.vibrate, intensity: vibIntensity });
     socket.emit('play_sound', { sound: combo.sound, volume: vol });
-    showToast('🎉 Sent ' + comboName + ' combo!');
+    showToast('🎉 Sent: ' + comboName);
   }
 
   function stopAll() {
     if (!socket) return;
     socket.emit('stop_all');
-    showToast('⏹ Stopped all signals');
+    if (navigator.vibrate) navigator.vibrate(0);
+    showToast('⏹ Stopped');
   }
 
   function disconnect() {
@@ -357,23 +367,39 @@ const App = (() => {
   function switchTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('tab-' + tab).classList.add('active');
-    document.getElementById('panel-' + tab).classList.add('active');
+    
+    const targetTab = document.getElementById('tab-' + tab);
+    const targetPanel = document.getElementById('panel-' + tab);
+    if (targetTab) targetTab.classList.add('active');
+    if (targetPanel) targetPanel.classList.add('active');
   }
 
-  // ── Audio unlock ─────────────────────────────
-  function unlockAudio() {
+  // ── Unlock Haptics & Audio ──────────────────
+  function unlockEverything() {
     try {
+      // 1. Unlock Audio
       getAudioCtx();
       audioUnlocked = true;
-      const btn = document.getElementById('btn-unlock-audio');
-      if (btn) {
-        btn.textContent = '✅ Sound enabled';
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
+      
+      // 2. Prime Haptics (1ms vibe)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10);
       }
-      showToast('🔊 Audio enabled!');
-    } catch(e) { showToast('Audio unlock failed'); }
+      
+      // 3. Update UI
+      const btn = document.getElementById('btn-unlock-all');
+      if (btn) {
+        btn.innerHTML = '✅ Synced & Active';
+        btn.classList.add('active');
+        setTimeout(() => {
+          btn.style.display = 'none';
+        }, 1500);
+      }
+      showToast('🔊 Haptics & Sound ready!');
+    } catch(e) { 
+      console.error(e);
+      showToast('Unlock failed'); 
+    }
   }
 
   // ── UI helpers ────────────────────────────────
@@ -387,6 +413,7 @@ const App = (() => {
   let toastTimer = null;
   function showToast(msg) {
     const toast = document.getElementById('toast');
+    if (!toast) return;
     toast.textContent = msg;
     toast.classList.add('show');
     clearTimeout(toastTimer);
@@ -398,6 +425,6 @@ const App = (() => {
     goLanding, goCreate, goJoin, copyCode,
     submitJoin, switchTab, updateIntensityLabel,
     sendVibrate, sendSound, sendCombo, stopAll,
-    disconnect, unlockAudio,
+    disconnect, unlockEverything,
   };
 })();
